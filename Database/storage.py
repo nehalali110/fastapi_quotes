@@ -52,8 +52,10 @@ def check_for_missing_field():
                 modified_at: str | None = None
             
             SQLModel.metadata.create_all(engine)
-            eng.execute(text("INSERT INTO temp_hero (name, secret_name, age) SELECT name, secret_name, age FROM hero2"))
+            eng.execute(text("INSERT INTO temp_hero (id, name, secret_name, age) SELECT id, name, secret_name, age FROM hero2"))
             eng.execute(text("DROP TABLE hero2"))
             eng.execute(text("ALTER TABLE temp_hero RENAME TO hero2"))
+
+            eng.commit()
 
 check_for_missing_field()
