@@ -1,61 +1,27 @@
-from sqlmodel import SQLModel, Field, create_engine, Session, text
+import sqlite3
 
-class Hero2(SQLModel, table=True):
-    id : int | None = Field(default=None, primary_key=True, sa_column_kwargs={"autoincrement": True})
-    name : str 
-    secret_name: str
-    age : int | None = None
+with sqlite3.connect("database.db") as con:
+    cur = con.cursor()
+    cur2 = con.cursor()
 
-sqlite_file_name = "database2.db"
-sqlite_url = f"sqlite:///./Database/{sqlite_file_name}"
-
-engine = create_engine(sqlite_url, echo=True)
-
-
-def create_db_and_tables():
-    print("Main running storage")
-    SQLModel.metadata.create_all(engine)
-
-def create_heroes():
-    hero1 = Hero2(name="Ironman", secret_name="Robert Downey Jr", age=23)
-    hero2 = Hero2(name="nothing",secret_name="onepunchman")
-
-    with Session(engine) as session:
-        session.add(hero1)
-        session.add(hero2)
-        session.commit()
-
-def main():
-    create_db_and_tables()
-    create_heroes()
-
-# if __name__ == "__main__":
-#     main()
-
-
-def check_for_missing_field():
-    with engine.connect() as eng:
-        all_metadata = eng.execute(text("PRAGMA table_info(hero2)"))
-        column_info = all_metadata
-        modify_flag_found = False
-        for column in column_info:
-            if column[1] == "modified_at":
-                modify_flag_found = True
-                break
-        
-        if not modify_flag_found:
-            class temp_hero(SQLModel, table=True):
-                id : int | None = Field(default=None, primary_key=True, sa_column_kwargs={"autoincrement": True})
-                name : str 
-                secret_name: str
-                age : int | None = None
-                modified_at: str | None = None
-            
-            SQLModel.metadata.create_all(engine)
-            eng.execute(text("INSERT INTO temp_hero (id, name, secret_name, age) SELECT id, name, secret_name, age FROM hero2"))
-            eng.execute(text("DROP TABLE hero2"))
-            eng.execute(text("ALTER TABLE temp_hero RENAME TO hero2"))
-
-            eng.commit()
-
-check_for_missing_field()
+    create_tables = cur.execute("""
+        CREATE TABLE IF NOT EXISTS quotes_temp2(
+            id INTEGER PRIMARY KEY,
+            quotation TEXT,
+            author TEXT,
+            created_at TEXT,
+            modified_at TEXT,
+            deleted_at TEXT                
+                                )
+""")
+    
+    check_Table = cur.execute("SELECT name from sqlite_master where name = 'quotes_temp2'")
+    
+    insert_data = cur2.execute("""
+        INSERT INTO quotes_temp2(quotation, author)
+        VALUES("this is the first delusional quote", "chris nolan"),
+              ("Second quote is also delusional", "henry matt")
+""")
+    
+    retrieve_tables = cur2.execute("SELECT * FROM quotes_temp")
+    print(retrieve_tables.fetchall())
