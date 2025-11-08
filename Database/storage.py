@@ -1,27 +1,59 @@
-import sqlite3
+import sqlite3, os
+import utils.helpers
+import Database.schema
+        
+def main():
+    Database.schema.initial_run()
+    get_quotes_from_db(None, "i", None)
 
-with sqlite3.connect("database.db") as con:
-    cur = con.cursor()
-    cur2 = con.cursor()
 
-    create_tables = cur.execute("""
-        CREATE TABLE IF NOT EXISTS quotes_temp2(
-            id INTEGER PRIMARY KEY,
-            quotation TEXT,
-            author TEXT,
-            created_at TEXT,
-            modified_at TEXT,
-            deleted_at TEXT                
-                                )
-""")
-    
-    check_Table = cur.execute("SELECT name from sqlite_master where name = 'quotes_temp2'")
-    
-    insert_data = cur2.execute("""
-        INSERT INTO quotes_temp2(quotation, author)
-        VALUES("this is the first delusional quote", "chris nolan"),
-              ("Second quote is also delusional", "henry matt")
-""")
-    
-    retrieve_tables = cur2.execute("SELECT * FROM quotes_temp")
-    print(retrieve_tables.fetchall())
+def get_quotes_from_db(cur, author, search, limit):
+    if not author and not search and not limit:
+        return cur.execute("SELECT * FROM quotes_temp").fetchall()
+
+    query = "SELECT * FROM quotes_temp"
+    params = []
+    values = []
+    if author:
+        params.append("LOWER(author)=?")
+        values.append(author.lower())
+
+    if search:
+        params.append("LOWER(quotation) LIKE ?")
+        values.append(f"%{search.lower()}%")
+
+    if author or search:
+        query += " WHERE " + " AND ".join(params)
+
+    if limit:
+        query += " LIMIT ?"
+        values.append(limit)
+
+    get_results = cur.execute(query, tuple(values))
+    return get_results.fetchall()
+
+
+
+def post_quotes_to_db(cur, quotation, author):
+    cur.execute("""
+        INSERT INTO quotes_temp(quotation, author, created_at) VALUES(?, ?, ?)
+""",(quotation, author, utils.helpers.add_timestamp()))
+
+
+def update_quotes_to_db(cur, quote_id, quotation, author):
+    params = {
+        "quotation" : quotation,
+        "author" : author
+    }
+    for key,value in params.items():
+        if value:
+            cur.execute(f"UPDATE quotes_temp SET {key}=?, modified_at=? WHERE id=?", (value, utils.helpers.add_timestamp(), quote_id))
+
+
+def delete_quotes_from_db(cur, quote_id):
+    cur.execute("UPDATE quotes_temp SET deleted_at=? WHERE id=?", (utils.helpers.add_timestamp(), quote_id))
+
+
+
+if __name__ == "__main__":
+    main()

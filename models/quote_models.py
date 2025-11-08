@@ -4,7 +4,7 @@ import sqlite3
 class GetQuery(BaseModel, extra=Extra.forbid):
     author: str | None = None
     search: str | None = None
-    limit: int | None = None
+    limit: int | None = Field(default=None, min_length=1)
 
 
 class PostQuery(BaseModel):
@@ -18,8 +18,3 @@ class PutQuery(BaseModel):
 
 
 
-with sqlite3.connect("database.db") as con:
-    cur = con.cursor()
-
-    retrieve_tables = cur.execute("SELECT * FROM quotes_temp2")
-    print(retrieve_tables.fetchall())
