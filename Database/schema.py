@@ -19,6 +19,16 @@ def create_quotes_table():
                        ("Until I meet him not even death himself could touch me", "Roranoa Zoro");
             """)
 
+def create_users_table():
+    with sqlite3.connect("database.db") as con:
+        cur = con.cursor()
+        cur.execute("""
+            CREATE TABLE users(
+                    user_id INTEGER PRIMARY KEY,
+                    email TEXT,
+                    password TEXT
+                );
+""")
 
 def initial_run():
     if not os.path.exists("C:\\Windows\\Temp\\First_run.txt"):
@@ -39,3 +49,13 @@ def drop_table(table_name):
     with sqlite3.connect("database.db") as con:
         cur = con.cursor()
         cur.execute(f"DROP TABLE {table_name}")
+
+
+def main():
+    with sqlite3.connect("database.db") as con:
+        cur = con.cursor()
+        users = cur.execute("SELECT * FROM users")
+        print(users.fetchall())
+
+if  __name__ == "__main__":
+    main()

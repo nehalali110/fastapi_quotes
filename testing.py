@@ -1,13 +1,5 @@
-from pydantic import BaseModel
+import re
 
-class User(BaseModel):
-    name : str
-    age : int
-
-
-user_input = User({"name": "adad", "age": 12})
-print(user_input)
-
-def introduce_user(user: User):
-    print(f"Hey {user.name} how are you from {user.age} years?")
-
+email_sample = "abc@xyz."
+pattern_search = re.search(r"\w+\@\w+\.\w{2,3}+", email_sample)
+print(pattern_search)

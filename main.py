@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, status
 import Database.storage
 from pydantic import BaseModel, Extra, Field
 from datetime import datetime
-from models.quote_models import GetQuery, PostQuery, PutQuery
+from models.quote_models import GetQuery, PostQuery, PutQuery, user
 import utils.helpers
 import sqlite3
 
@@ -50,3 +50,10 @@ def delete_quotes(quote_id: int):
         Database.storage.delete_quotes_from_db(cur, quote_id)
         return 
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quote not found")
+
+@app.post("/register")
+def register_user(params: user):
+    with sqlite3.connect("database.db") as con:
+        cur = con.cursor()
+        Database.storage.create_user(cur, params.email, params.password)
+        return {"msg": "success", "value": "created"}

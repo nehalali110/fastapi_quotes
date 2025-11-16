@@ -17,4 +17,9 @@ class PutQuery(BaseModel):
     author: str | None = Field(default=None, min_length = 1, max_length = 500)
 
 
+class user(BaseModel):
+    email: str = Field(pattern=r"\w+@\w+\.\w{2,3}")
+    password : str = Field(min_length=10)
+
+
 

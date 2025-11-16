@@ -1,6 +1,7 @@
 import sqlite3, os
 import utils.helpers
 import Database.schema
+from Database.hash import hash_password
         
 def main():
     Database.schema.initial_run()
@@ -53,6 +54,11 @@ def update_quotes_to_db(cur, quote_id, quotation, author):
 def delete_quotes_from_db(cur, quote_id):
     cur.execute("UPDATE quotes_temp SET deleted_at=? WHERE id=?", (utils.helpers.add_timestamp(), quote_id))
 
+
+
+def create_user(cur, user_email, user_pass):
+    hash = hash_password(user_pass)
+    cur.execute("INSERT INTO users(email, password) VALUES(?,?);", (user_email, hash))
 
 
 if __name__ == "__main__":
