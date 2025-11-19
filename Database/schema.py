@@ -20,12 +20,12 @@ def create_quotes_table():
             """)
 
 def create_users_table():
-    with sqlite3.connect("database.db") as con:
+    with sqlite3.connect("Database/database.db") as con:
         cur = con.cursor()
         cur.execute("""
             CREATE TABLE users(
                     user_id INTEGER PRIMARY KEY,
-                    email TEXT,
+                    email TEXT UNIQUE,
                     password TEXT
                 );
 """)
@@ -52,10 +52,7 @@ def drop_table(table_name):
 
 
 def main():
-    with sqlite3.connect("database.db") as con:
-        cur = con.cursor()
-        users = cur.execute("SELECT * FROM users")
-        print(users.fetchall())
+    create_users_table()
 
 if  __name__ == "__main__":
     main()

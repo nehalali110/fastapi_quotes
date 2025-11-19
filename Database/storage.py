@@ -2,6 +2,7 @@ import sqlite3, os
 import utils.helpers
 import Database.schema
 from Database.hash import hash_password
+import bcrypt
         
 def main():
     Database.schema.initial_run()
@@ -61,5 +62,11 @@ def create_user(cur, user_email, user_pass):
     cur.execute("INSERT INTO users(email, password) VALUES(?,?);", (user_email, hash))
 
 
+def verify_user(cur, user_email, user_pass):
+    search_user_query = f"SELECT * FROM users WHERE email = ? AND TRUE"
+    result = cur.execute(search_user_query, (user_email))
+    return result.fetchall()
+
 if __name__ == "__main__":
     main()
+

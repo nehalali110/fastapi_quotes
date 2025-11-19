@@ -53,7 +53,14 @@ def delete_quotes(quote_id: int):
 
 @app.post("/register")
 def register_user(params: user):
-    with sqlite3.connect("database.db") as con:
+    with sqlite3.connect("Database/database.db") as con:
         cur = con.cursor()
         Database.storage.create_user(cur, params.email, params.password)
         return {"msg": "success", "value": "created"}
+
+
+@app.post("/login")
+def login_user(params: user):
+    with sqlite3.connect("Database/database.db") as con:
+        cur = con.cursor()
+        return Database.storage.verify_user(cur, params.email, params.password)
