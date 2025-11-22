@@ -18,7 +18,7 @@ class PutQuery(BaseModel):
 
 
 class user(BaseModel):
-    email: str = Field(pattern=r"\w+@\w+\.\w{2,3}")
+    email: str = Field(pattern=r"^\w+@\w+\.\w{2,3}$")
     password : str = Field(min_length=10)
 
 

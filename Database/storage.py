@@ -63,9 +63,14 @@ def create_user(cur, user_email, user_pass):
 
 
 def verify_user(cur, user_email, user_pass):
-    search_user_query = f"SELECT * FROM users WHERE email = ? AND TRUE"
-    result = cur.execute(search_user_query, (user_email))
-    return result.fetchall()
+    search_user_query = "SELECT * FROM users WHERE email = ?"
+    result = cur.execute(search_user_query, (user_email,)).fetchall()
+
+    # checking if the password hash matches too
+    if result and bcrypt.checkpw(user_pass.encode(), result[0][2].encode()):
+        return result
+    else:        
+        return []
 
 if __name__ == "__main__":
     main()
