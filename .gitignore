@@ -8,3 +8,9 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Sensitive-Info variables
+.env
+
+# testing files
+testing.py
