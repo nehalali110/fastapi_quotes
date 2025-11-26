@@ -15,6 +15,7 @@ def add_timestamp():
     current_datetime = datetime.now()
     return current_datetime.strftime("%d-%m-%Y %H:%M:%S")
 
-def generate_token():
-    jwt_token = os.getenv('JWT_SECRET')
-    return jwt.encode
+def generate_token(user_id, user_email):
+    jwt_token_secret = os.getenv('JWT_SECRET')
+    payload = {"user_id": user_id, "user_email": user_email}
+    return jwt.encode(payload, jwt_token_secret, algorithm="HS256")
