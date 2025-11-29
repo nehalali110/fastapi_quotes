@@ -1,6 +1,7 @@
 import re
 import jwt
 import secrets
+from datetime import datetime, timedelta, timezone
 # email_sample = "abc@xyz.japan"
 # pattern_search = re.search(r"^\w+@\w+\.\w{2,3}$", email_sample)
 # print(pattern_search)
@@ -17,4 +18,6 @@ import secrets
 
 # with open('.env', 'w') as f:
 # 	f.write(f"JWT_SECRET={secrets.token_urlsafe()}")
+
+print(datetime.now(timezone.utc))
 

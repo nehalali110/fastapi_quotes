@@ -3,10 +3,8 @@ import utils.helpers
 import Database.schema
 from Database.hash import hash_password
 import bcrypt
-        
-def main():
-    Database.schema.initial_run()
-    get_quotes_from_db(None, "i", None)
+import jwt
+
 
 
 def get_quotes_from_db(cur, author, search, limit):
@@ -65,13 +63,19 @@ def create_user(cur, user_email, user_pass):
 def verify_user(cur, user_email, user_pass):
     search_user_query = "SELECT * FROM users WHERE email = ?"
     result = cur.execute(search_user_query, (user_email,)).fetchall()
+   
 
     # checking if the password hash matches too
-    if result and bcrypt.checkpw(user_pass.encode(), result[0][2].encode()):
-        return result
+    if result:
+        db_user_id = result[0][0]
+        db_user_email = result[0][1]
+        db_user_password_hash = result[0][2]
+        if bcrypt.checkpw(user_pass.encode(), db_user_password_hash.encode()):
+            user_jwt_token = utils.helpers.generate_token(db_user_id, db_user_email)
+            return user_jwt_token
+
     else:        
         return []
-
+   
 if __name__ == "__main__":
     main()
-

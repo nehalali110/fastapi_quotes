@@ -1,10 +1,12 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Request
 import Database.storage
 from pydantic import BaseModel, Extra, Field
 from datetime import datetime
 from models.quote_models import GetQuery, PostQuery, PutQuery, user
 import utils.helpers
 import sqlite3
+
+
 
 app = FastAPI()
 
@@ -15,9 +17,17 @@ def home():
 
 
 @app.get('/quotes')
-def get_quotes(params: GetQuery = Depends()):
+def get_quotes(request: Request, params: GetQuery = Depends()):
     with sqlite3.connect("Database/database.db") as con:
         cur = con.cursor()
+        jwt_token = request.headers.get('authorization').split(" ")[1]
+        token_data = utils.helpers.validate_token(jwt_token)
+        # Terminate the process if error occurs
+        if not token_data[0]: return token_data
+
+        print(token_data)
+
+
         filtered_quotes = Database.storage.get_quotes_from_db(cur, params.author, params.search, params.limit)
         return filtered_quotes
         
@@ -52,9 +62,10 @@ def delete_quotes(quote_id: int):
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quote not found")
 
 @app.post("/register")
-def register_user(params: user):
+def register_user(params: user, request: Request):
     with sqlite3.connect("Database/database.db") as con:
         cur = con.cursor()
+        print(request.headers)
         Database.storage.create_user(cur, params.email, params.password)
         return {"msg": "success", "value": "created"}
 
@@ -64,3 +75,4 @@ def login_user(params: user):
     with sqlite3.connect("Database/database.db") as con:
         cur = con.cursor()
         return Database.storage.verify_user(cur, params.email, params.password)
+
