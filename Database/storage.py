@@ -7,13 +7,13 @@ import jwt
 
 
 
-def get_quotes_from_db(cur, author, search, limit):
+def get_quotes_from_db(cur, user_id, author, search, limit):
     if not author and not search and not limit:
-        return cur.execute("SELECT * FROM quotes_temp").fetchall()
+        return cur.execute("SELECT * FROM quotes_temp WHERE user_id=?",(user_id,)).fetchall()
 
     query = "SELECT * FROM quotes_temp"
-    params = []
-    values = []
+    params = ["user_id=?"]
+    values = [user_id]
     if author:
         params.append("LOWER(author)=?")
         values.append(author.lower())
@@ -34,24 +34,24 @@ def get_quotes_from_db(cur, author, search, limit):
 
 
 
-def post_quotes_to_db(cur, quotation, author):
+def post_quotes_to_db(cur, user_id, quotation, author):
     cur.execute("""
-        INSERT INTO quotes_temp(quotation, author, created_at) VALUES(?, ?, ?)
-""",(quotation, author, utils.helpers.add_timestamp()))
+        INSERT INTO quotes_temp(quotation, author, created_at, user_id) VALUES(?, ?, ?, ?)
+""",(quotation, author, utils.helpers.add_timestamp(), user_id))
 
 
-def update_quotes_to_db(cur, quote_id, quotation, author):
+def update_quotes_to_db(cur, user_id, quote_id, quotation, author):
     params = {
         "quotation" : quotation,
         "author" : author
     }
     for key,value in params.items():
         if value:
-            cur.execute(f"UPDATE quotes_temp SET {key}=?, modified_at=? WHERE id=?", (value, utils.helpers.add_timestamp(), quote_id))
+            cur.execute(f"UPDATE quotes_temp SET {key}=?, modified_at=? WHERE id=? AND user_id=?", (value, utils.helpers.add_timestamp(), quote_id, user_id))
 
 
-def delete_quotes_from_db(cur, quote_id):
-    cur.execute("UPDATE quotes_temp SET deleted_at=? WHERE id=?", (utils.helpers.add_timestamp(), quote_id))
+def delete_quotes_from_db(cur, user_id, quote_id):
+    cur.execute("UPDATE quotes_temp SET deleted_at=? WHERE id=? AND user_id=?", (utils.helpers.add_timestamp(), quote_id, user_id))
 
 
 

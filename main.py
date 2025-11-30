@@ -20,34 +20,50 @@ def home():
 def get_quotes(request: Request, params: GetQuery = Depends()):
     with sqlite3.connect("Database/database.db") as con:
         cur = con.cursor()
-        jwt_token = request.headers.get('authorization').split(" ")[1]
-        token_data = utils.helpers.validate_token(jwt_token)
+        print(request.headers)
+        token_data = utils.helpers.fetch_token_data(request.headers)
+
         # Terminate the process if error occurs
         if not token_data[0]: return token_data
 
         print(token_data)
+        user_id = token_data[1]["user_id"]
 
-
-        filtered_quotes = Database.storage.get_quotes_from_db(cur, params.author, params.search, params.limit)
+        filtered_quotes = Database.storage.get_quotes_from_db(cur, user_id, params.author, params.search, params.limit)
         return filtered_quotes
         
 
 @app.post("/quotes")
-def post_quotes(params: PostQuery):
+def post_quotes(request: Request, params: PostQuery):
     with sqlite3.connect("Database/database.db") as con:
         cur = con.cursor()
-        Database.storage.post_quotes_to_db(cur, params.text, params.author)
+        token_data = utils.helpers.fetch_token_data(request.headers)
+
+        # Terminate the process if error occurs
+        if not token_data[0]: return token_data
+
+        print(token_data)
+        user_id = token_data[1]["user_id"]
+        Database.storage.post_quotes_to_db(cur, user_id, params.text, params.author)
         return {"status": "success", "message": "created"}
 
 
 @app.put("/quotes/{quote_id}")
-def put_quotes(quote_id: int, params: PutQuery):
+def put_quotes(request: Request, quote_id: int, params: PutQuery):
     if params.text == None and params.author == None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="text and author both cannot be empty")
     
     with sqlite3.connect("Database/database.db") as con:
         cur = con.cursor()
-        Database.storage.update_quotes_to_db(cur, quote_id, params.text, params.author)
+        token_data = utils.helpers.fetch_token_data(request.headers)
+
+        # Terminate the process if error occurs
+        if not token_data[0]: return token_data
+
+        print(token_data)
+        user_id = token_data[1]["user_id"]
+
+        Database.storage.update_quotes_to_db(cur, user_id, quote_id, params.text, params.author)
         return {"status": "success", "message": "quote modified"}
         
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quote not found")
@@ -57,7 +73,14 @@ def put_quotes(quote_id: int, params: PutQuery):
 def delete_quotes(quote_id: int):
     with sqlite3.connect("Database/database.db") as con:
         cur = con.cursor()
-        Database.storage.delete_quotes_from_db(cur, quote_id)
+        token_data = utils.helpers.fetch_token_data(request.headers)
+
+        # Terminate the process if error occurs
+        if not token_data[0]: return token_data
+
+        print(token_data)
+        user_id = token_data[1]["user_id"]
+        Database.storage.delete_quotes_from_db(cur, user_id, quote_id)
         return 
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quote not found")
 
