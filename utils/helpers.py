@@ -27,12 +27,14 @@ def generate_token(user_id, user_email):
 
 def fetch_token_data(headers):
     try:
-        token = headers.get('authorization').split(" ")[1]
-        if not token:
+        auth = headers.get('authorization').split(" ")
+        auth_type = auth[0]
+        auth_token = auth[1]
+        if not auth_token or not auth_type == "Bearer":
             raise Exception("Unauthorized access")
 
         jwt_token_secret = os.getenv("JWT_SECRET")
-        token_data = jwt.decode(token, jwt_token_secret, algorithms="HS256")
+        token_data = jwt.decode(auth_token, jwt_token_secret, algorithms="HS256")
         return (1, token_data)    
 
     except AttributeError:

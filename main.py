@@ -70,7 +70,7 @@ def put_quotes(request: Request, quote_id: int, params: PutQuery):
 
 
 @app.delete("/quotes/{quote_id}")
-def delete_quotes(quote_id: int):
+def delete_quotes(request: Request, quote_id: int):
     with sqlite3.connect("Database/database.db") as con:
         cur = con.cursor()
         token_data = utils.helpers.fetch_token_data(request.headers)
